@@ -41,22 +41,16 @@ st.markdown("""
 
 
 # App Header with a decorative banner image using a fallback image URL
-col1, col2 = st.columns([5, 3])
-with col1:
 
-
-    st.markdown("""
+st.markdown("""
     <div style="text-align: center; background-color: #003366; padding: 20px; border-radius: 10px; margin-bottom: 15px;">   
-    <h1 style="color: #FFD700; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;; font-size: 20px; font-weight: 600;">
+    <h1 style="color: #FFD700; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;; font-size: 25px; font-weight: 600;">
             Transforming Insights into Action: Telco Customer Churn Analysis
         </h1>
     </div>
     """, unsafe_allow_html=True)
     
     
-with col2:
-
-    st.image("Title.jpeg", width=200)
 # Load dataset with caching
 @st.cache_data
 def load_data():
@@ -142,7 +136,7 @@ model, acc, cm, feature_importance, X_train, X_test, y_train, y_test = train_mod
 
 # Sidebar options for navigation
 option = st.sidebar.selectbox("🔍 Choose Analysis", 
-                              ["📊 Dataset Overview", "📈 Visualizations", "🤖 Churn Prediction", "📈 Model Evaluation"])
+                              ["📊 Dataset Exploration", "📈 Visualizations", "🤖 Churn Prediction", "📈 Model Validation & Analysis"])
 # Global Filters - Positioned Below Page Selection
 st.sidebar.markdown("### 🌍 Global Filters")
 
@@ -187,10 +181,19 @@ filtered_df = df_processed[
 
 
 # Page 1: Dataset Overview
-if option == "📊 Dataset Overview":
+if option == "📊 Dataset Exploration":
 
+    
+    st.markdown("""
+        <div style="text-align: center; 
+                    font-size: 25px; 
+                    font-weight: bold; 
+                    color: #000000;"> 
+            📝 Filtered Dataset Overview
+        </div>
+      """, unsafe_allow_html=True)
+      
 
-    st.write("## 📝 Filtered Dataset Overview")
     # Convert customer_churn DataFrame to CSV
     csv_data = filtered_df.to_csv(index=False).encode("utf-8")
 
@@ -206,7 +209,17 @@ if option == "📊 Dataset Overview":
         display_df["Dependents"] = display_df["Dependents"].map({0: "No", 1: "Yes"})
         
         st.write(display_df.head())  # Show first few rows with labels
-        st.write("### 📌 Filtered Data Summary")
+        
+        
+        st.markdown("""
+            <div style="text-align: center; 
+                        font-size: 25px; 
+                        font-weight: bold; 
+                        color: #000000;"> 
+                📝 Filtered Data Summary
+            </div>
+          """, unsafe_allow_html=True)
+          
         st.write(display_df.describe())
         
         # Add a Download Button for CSV
@@ -234,14 +247,40 @@ if option == "📊 Dataset Overview":
 
 # Page 2: Visualizations
 elif option == "📈 Visualizations":
-    # Section 1: Key Metrics
-    col1, col2, col3, col4 = st.columns(4)
-    
     # Increase width of col1 (1:1 ratio)
-    col1, col2, col3, col4 = st.columns([1, 1,1,2])  
+    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+
+    # Apply Custom CSS for Grey Boxes and Yellow Text
+    st.markdown("""
+        <style>
+            .metric-box {
+                background-color: #444; /* Grey background */
+                padding: 8px;
+                border-radius: 6px;
+                text-align: center;
+                color: #FFD700 !important; /* Yellow font */
+                font-size: 14px;
+                margin: 5px;
+            }
+            .metric-title {
+                font-size: 12px;
+                font-weight: bold;
+                color: white;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    # Function to create a custom metric box
+    def custom_metric(title, value):
+        st.markdown(f"""
+            <div class="metric-box">
+                <div class="metric-title">{title}</div>
+                <div>{value}</div>
+            </div>
+        """, unsafe_allow_html=True)
     
     with col1:
-        st.metric("Total Customers", len(filtered_df),help="Total number of customers in dataset")
+        custom_metric("Total Customers", len(filtered_df))
     
     # Convert 'Churn' column from strings to numeric (1 for Yes, 0 for No)
     if filtered_df['Churn'].dtype == 'object':
@@ -249,19 +288,94 @@ elif option == "📈 Visualizations":
     
     with col2:
         churn_rate = filtered_df['Churn'].mean() * 100
-        st.metric("Churn Rate", f"{churn_rate:.1f}%")
-        
+        custom_metric("Churn Rate", f"{churn_rate:.1f}%")
+    
     with col3:
-        st.metric("Avg Monthly Charges", f"${filtered_df['MonthlyCharges'].mean():.2f}")
-        
+        custom_metric("Avg Monthly Charges", f"${filtered_df['MonthlyCharges'].mean():.2f}")
+    
     with col4:
-        st.metric("Avg Tenure", f"{filtered_df['tenure'].mean():.1f} months",help="Average Customer Lifetime Value")
+        custom_metric("Avg Tenure", f"{filtered_df['tenure'].mean():.1f} months")
+    
+             
+       # 📌 Apply Custom CSS for Better Styling
+    st.markdown("""<style>
+        body {
+            background-color: #f7f7f7;  /* Light Background */
+            color: #FFD700 !important;  /* Yellow Font */
+        }
+        .box-container {
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .chart-selector {
+            font-size: 22px !important;
+            text-align: center;
+            font-weight: bold !important;
+            color: #FFD700 !important;  /* Yellow Font */
+        }
+        .stRadio > label {
+            font-size: 30px !important;
+            text-align: center;
+            font-weight: bold !important;
+            color: #FFD700 !important;  /* Yellow Font */
+        }
+        .stRadio div[role="radiogroup"] {
+            justify-content: center;
+            display: flex;
+            background: #FFF2CC;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        .stRadio div[role="radiogroup"] label {
+            color: #000000 !important; /* Black text for buttons *
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 25px !important;
+        }
+        h1, h2, h3 {
+            color: #FFD700 !important;  /* Yellow Font */
+            text-align: center;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
-    # Increase width of col1 (1:1 ratio)
-    col1, col2 = st.columns([1, 1])  
-
+    
+        # Center-align and set medium font size for "Select Chart Type"
+    st.markdown("""
+            <div style="text-align: center; 
+                        font-size: 25px; 
+                        font-weight: bold; 
+                        color: #000000;"> 
+                📊 Select Chart Type
+            </div>
+        """, unsafe_allow_html=True)
         
-    with col1:
+        # Radio Button for Chart Selection (Still Functional)
+
+    chart_type = st.radio("", ["Pie Chart", "Histogram", "Sunburst Chart", "Funnel Chart", "Service Usage Patterns"], horizontal=True)
+        
+            
+    st.markdown("""
+              <div style="text-align: center; 
+                          font-size: 25px; 
+                          font-weight: bold; 
+                          color: #000000;"> 
+                  📊 Smart Churn Analytics
+              </div>
+          """, unsafe_allow_html=True)
+          
+   # Add more space
+    st.markdown("<br><br>", unsafe_allow_html=True)
+       
+    
+# Pie Chart: Churn Distribution
+    if chart_type == "Pie Chart":
+        st.markdown('<h3 style="color:#000000;">📊 Gender Pie Chart</h3>', unsafe_allow_html=True)
+
         # Create a copy and map gender values to labels for display
         pie_df = filtered_df.copy()
         pie_df["gender"] = pie_df["gender"].map({0: "Female", 1: "Male"})  # Convert 0/1 to labels
@@ -270,109 +384,117 @@ elif option == "📈 Visualizations":
         gender_counts = pie_df["gender"].value_counts(normalize=True) * 100
         male_percentage = gender_counts.get("Male", 0)
         female_percentage = gender_counts.get("Female", 0)
-        
+    
         # Display dynamic help text
-        st.caption(f"📊 Gender Distribution: Males - {male_percentage:.1f}%, Females - {female_percentage:.1f}%")
-        
+        st.markdown(f"""
+        <div style=" 
+                    font-size: 20px; 
+                    font-weight: bold; 
+                    text-align: center;">
+            Gender Distribution: Males - {male_percentage:.1f}%, Females - {female_percentage:.1f}%
+        </div>
+        """, unsafe_allow_html=True)
+    
         # Generate pie chart with readable labels
         fig = px.pie(pie_df, names='gender', title='Gender Distribution',
                      color_discrete_sequence=px.colors.sequential.Aggrnyl)
-        
+    
         fig.update_traces(textposition='inside', textinfo='percent+label')
         fig.update_layout(width=400, height=500)
     
         st.plotly_chart(fig, use_container_width=True)
 
-       
-            
-    with col2:
+
+    elif chart_type == "Histogram":
+        st.markdown('<h3 style="color:#000000;">📊 Tenure Histogram</h3>', unsafe_allow_html=True)
         fig = px.histogram(filtered_df, x='tenure', nbins=20, title='Tenure Distribution',
                            color_discrete_sequence=['#00F3FF'])
         fig.update_layout(bargap=0.1)
         fig.update_layout(width=1000, height=500)
         st.plotly_chart(fig, use_container_width=True)
         
+    elif chart_type == "Funnel Chart":
+        # Funnel Chart: Customer Retention Flow
+        st.markdown("""
+            <h3 style="color:#00000;">📊 Customer Retention Funnel</h3>
+        """, unsafe_allow_html=True)
     
+        # Group data to calculate churned vs retained customers
+        funnel_data = filtered_df.groupby('Churn').size().reset_index(name='count')
+        funnel_data['Churn'] = funnel_data['Churn'].map({0: "Retained", 1: "Churned"})
+    
+        # Create funnel chart
+        fig = px.funnel(
+            funnel_data, 
+            x='count', 
+            y='Churn', 
+            title="Customer Retention Funnel"
+        )
+        
+        # Display chart in Streamlit
+        st.plotly_chart(fig, use_container_width=True)
 
-    # Funnel Chart: Customer Retention Flow
-    st.markdown("""
-        <h3 style="color:#FF1493;">📊 Customer Retention Funnel</h3>
-    """, unsafe_allow_html=True)
+    elif chart_type == "Sunburst Chart":
+        # Sunburst Chart: Customer Breakdown by Contract, Payment Method, and Churn
+    
+        st.markdown("""
+                <h3 style="color:#00000;">📌 Sunburst Chart </h3>
+            """, unsafe_allow_html=True)
+        
+        # Create a copy for display and map values for better readability
+        sunburst_df = filtered_df.copy()
+        sunburst_df["Contract"] = sunburst_df["Contract"].map({0: "Month-to-month", 1: "One year", 2: "Two year"})
+        sunburst_df["Churn"] = sunburst_df["Churn"].map({0: "No", 1: "Yes"})
+        sunburst_df["PaymentMethod"] = sunburst_df["PaymentMethod"].map({
+            0: "Electronic Check", 1: "Mailed Check", 2: "Bank Transfer (Auto)", 3: "Credit Card (Auto)"
+        })
+        
+        # Group the data to get counts for each segment
+        grouped_sunburst = sunburst_df.groupby(["Contract", "PaymentMethod", "Churn"]).size().reset_index(name='Count')
+        
+        # Calculate churn rates dynamically
+        churn_rates = sunburst_df.groupby(["Contract", "PaymentMethod"])["Churn"].value_counts(normalize=True).unstack().fillna(0)
+        churn_rates["Churn Rate"] = churn_rates["Yes"] * 100  # Convert to percentage
+        
+        # Identify highest and lowest churn segments
+        highest_churn = churn_rates["Churn Rate"].idxmax()
+        lowest_churn = churn_rates["Churn Rate"].idxmin()
+        
+        highest_churn_text = f"{highest_churn[0]} contracts with {highest_churn[1]} have the highest churn rate."
+        lowest_churn_text = f"{lowest_churn[0]} contracts with {lowest_churn[1]} have the lowest churn rate."
+        
+        # Display dynamic churn insights
+        st.markdown(f"📊 **{highest_churn_text}**")
+        st.markdown(f"✅ **{lowest_churn_text}**")
+        
+        # Create Sunburst chart with correct values and labels
+        fig = px.sunburst(
+            grouped_sunburst,
+            path=['Contract', 'PaymentMethod', 'Churn'],
+            values='Count',
+            title="Customer Segmentation",
+            color='Churn', 
+            color_discrete_map={"No": "#008000", "Yes": "#FF0000"}  # Green for No Churn, Red for Churn
+        )
+        
+        # Show labels explicitly with percentages
+        fig.update_traces(textinfo="label+percent parent")
+        
+        # Display chart in Streamlit
+        st.plotly_chart(fig, use_container_width=True)
 
-    # Group data to calculate churned vs retained customers
-    funnel_data = filtered_df.groupby('Churn').size().reset_index(name='count')
-    funnel_data['Churn'] = funnel_data['Churn'].map({0: "Retained", 1: "Churned"})
-
-    # Create funnel chart
-    fig = px.funnel(
-        funnel_data, 
-        x='count', 
-        y='Churn', 
-        title="Customer Retention Funnel"
-    )
+    elif chart_type == "Service Usage Patterns":
+        st.markdown("""
+            <h3 style="color:#00000;">📊 Service Usage Patterns</h3>
+        """, unsafe_allow_html=True)
+        service_cols = ['PhoneService', 'InternetService', 'StreamingTV', 'TechSupport']
+        selected_service = st.selectbox("Select Service", service_cols)
     
-    # Display chart in Streamlit
-    st.plotly_chart(fig, use_container_width=True)
-
-
-    # Sunburst Chart: Customer Breakdown by Contract, Payment Method, and Churn
-
-    st.markdown("""
-        <h3 style="color:#32CD32;">📌 Customer Breakdown: Contract + Payment + Churn</h3>
-    """, unsafe_allow_html=True)
+        fig = px.bar(filtered_df, x=selected_service, color='Churn', barmode='group',
+                     title=f'{selected_service} vs Churn',
+                     color_discrete_sequence=['#FF00FF', '#00FF00'])
     
-    # Create a copy for display and map values for better readability
-    sunburst_df = filtered_df.copy()
-    sunburst_df["Contract"] = sunburst_df["Contract"].map({0: "Month-to-month", 1: "One year", 2: "Two year"})
-    sunburst_df["Churn"] = sunburst_df["Churn"].map({0: "No", 1: "Yes"})
-    sunburst_df["PaymentMethod"] = sunburst_df["PaymentMethod"].map({
-        0: "Electronic Check", 1: "Mailed Check", 2: "Bank Transfer (Auto)", 3: "Credit Card (Auto)"
-    })
-    
-    # Group the data to get counts for each segment
-    grouped_sunburst = sunburst_df.groupby(["Contract", "PaymentMethod", "Churn"]).size().reset_index(name='Count')
-    
-    # Calculate churn rates dynamically
-    churn_rates = sunburst_df.groupby(["Contract", "PaymentMethod"])["Churn"].value_counts(normalize=True).unstack().fillna(0)
-    churn_rates["Churn Rate"] = churn_rates["Yes"] * 100  # Convert to percentage
-    
-    # Identify highest and lowest churn segments
-    highest_churn = churn_rates["Churn Rate"].idxmax()
-    lowest_churn = churn_rates["Churn Rate"].idxmin()
-    
-    highest_churn_text = f"{highest_churn[0]} contracts with {highest_churn[1]} have the highest churn rate."
-    lowest_churn_text = f"{lowest_churn[0]} contracts with {lowest_churn[1]} have the lowest churn rate."
-    
-    # Display dynamic churn insights
-    st.markdown(f"📊 **{highest_churn_text}**")
-    st.markdown(f"✅ **{lowest_churn_text}**")
-    
-    # Create Sunburst chart with correct values and labels
-    fig = px.sunburst(
-        grouped_sunburst,
-        path=['Contract', 'PaymentMethod', 'Churn'],
-        values='Count',
-        title="Customer Segmentation",
-        color='Churn', 
-        color_discrete_map={"No": "#008000", "Yes": "#FF0000"}  # Green for No Churn, Red for Churn
-    )
-    
-    # Show labels explicitly with percentages
-    fig.update_traces(textinfo="label+percent parent")
-    
-    # Display chart in Streamlit
-    st.plotly_chart(fig, use_container_width=True)
-
-
-    st.header("🔌 Service Usage Patterns")
-    service_cols = ['PhoneService', 'InternetService', 'StreamingTV', 'TechSupport']
-    selected_service = st.selectbox("Select Service", service_cols)
-
-    fig = px.bar(filtered_df, x=selected_service, color='Churn', barmode='group',
-                 title=f'{selected_service} vs Churn',
-                 color_discrete_sequence=['#FF00FF', '#00FF00'])
-
-    st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True)
 
 # Page 3: Churn Prediction
 elif option == "🤖 Churn Prediction":
@@ -456,7 +578,7 @@ elif option == "🤖 Churn Prediction":
             st.write("**Prediction: This customer is likely to stay.**")
 
 # Page 4: Model Evaluation
-elif option == "📈 Model Evaluation":
+elif option == "📈 Model Validation & Analysis":
     st.write("## 📊 Model Evaluation Metrics")
 
     # Apply colorful, bold, and large font size to Model Accuracy
