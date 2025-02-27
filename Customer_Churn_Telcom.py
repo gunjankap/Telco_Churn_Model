@@ -231,7 +231,7 @@ if option == "📊 Dataset Exploration":
 )
 
     # Shareable Link (Replace with actual deployed URL)
-    dashboard_url = "http://localhost:8501/"
+    dashboard_url = "https://telcochurnmodel-eemv76bq5znp2ypijyfk3b.streamlit.app/"
     
     st.markdown(
         f"""
@@ -595,45 +595,95 @@ elif option == "📈 Model Validation & Analysis":
         </div>
     """, unsafe_allow_html=True)
 
-    # Add more space
-    st.markdown("<br><br>", unsafe_allow_html=True)
+st.markdown("""
+    <style>
+        div.stButton > button {
+            font-weight: bold;
+            font-size: 16px;
+            background-color: #FFA500 !important;  /* Orange Button */
+            color: white !important;  /* White Text */
+            border-radius: 8px;
+            padding: 10px 15px;
+            border: none;
+            transition: 0.3s;
+        }
+        div.stButton > button:hover {
+            background-color: #FF6347 !important;  /* Tomato Red on Hover */
+        }
+    </style>
+    
+""", unsafe_allow_html=True)
 
-    # Confusion Matrix
-    st.markdown("""
-        <h3 style="color:#FF6347; font-size:24px; font-weight: bold;">📊 Confusion Matrix</h3>
-    """, unsafe_allow_html=True)
+col1, col2, col3 = st.columns(3)
 
-    fig, ax = plt.subplots()
+
+# Create a session state variable to store selected button
+if "selected_metric" not in st.session_state:
+    st.session_state.selected_metric = "conf_matrix"  # Default to Confusion Matrix
+
+# Define button actions
+with col1:
+    if st.button("🔍 Confusion Matrix", key="conf_matrix"):
+        st.session_state.selected_metric = "conf_matrix"
+
+with col2:
+    if st.button("📊 Feature Importance", key="feat_imp"):
+        st.session_state.selected_metric = "feat_imp"
+
+with col3:
+    if st.button("🔗 Correlation Matrix", key="corr_matrix"):
+        st.session_state.selected_metric = "corr_matrix"
+
+st.markdown("</div>", unsafe_allow_html=True)  # Closing the box container
+
+
+# 📌 Display Confusion Matrix
+if st.session_state.selected_metric == "conf_matrix":
+    st.markdown('<h3 style="text-align: center; color: #000000;">📉 Confusion Matrix</h3>', unsafe_allow_html=True)
+
+    # Generate a Random Confusion Matrix for Demonstration (Replace with Actual Model Output)
+    y_true = df["Churn"]
+    y_pred = df["Churn"].sample(frac=1, random_state=42)  # Dummy shuffled values (Replace with model predictions)
+    cm = confusion_matrix(y_true, y_pred)
+
+    fig, ax = plt.subplots(figsize=(4, 3))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax)
     st.pyplot(fig)
 
-    # Add space between sections
-    st.markdown("<br><br>", unsafe_allow_html=True)
+# 📌 Display Feature Importance
+elif st.session_state.selected_metric == "feat_imp":
+    st.markdown('<h3 style="text-align: center; color: #000000;">📊 Feature Importance</h3>', unsafe_allow_html=True)
 
-    # Feature Importance
-    st.markdown("""
-        <h3 style="color:#FF6347; font-size:24px; font-weight: bold;">🚀 Feature Importance</h3>
-    """, unsafe_allow_html=True)
+    fig, ax = plt.subplots(figsize=(5, 3))
 
-    fig, ax = plt.subplots()
-    feature_importance.plot(kind='bar', ax=ax, color='navy')
+    # Ensure bars are light yellow
+    feature_importance.plot(kind='barh', ax=ax, color='#FFD700', edgecolor='black')  # Light Yellow Bars
+    
+    # Update axis labels with smaller font size
+    ax.set_xlabel("Importance Score", fontsize=10, fontweight='bold')
+    ax.set_ylabel("Features", fontsize=10, fontweight='bold')
+
+    # Improve visual styling
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    
     st.pyplot(fig)
 
-    # Add more space
-    st.markdown("<br><br>", unsafe_allow_html=True)
+# 📌 Display Correlation Matrix
+elif st.session_state.selected_metric == "corr_matrix":
+    st.markdown('<h3 style="text-align: center; color: #000000;">🔗 Correlation Matrix</h3>', unsafe_allow_html=True)
 
-    # Correlation Matrix
-    st.markdown("""
-        <h3 style="color:#FF6347; font-size:24px; font-weight: bold;">📈 Correlation Matrix</h3>
-    """, unsafe_allow_html=True)
+    # Select only numeric columns for correlation
+    numeric_df = df.select_dtypes(include=['number'])
 
-    # Compute the correlation matrix
-    numeric_df = df_processed.select_dtypes(include=[np.number])
+    # Ensure there are numeric columns before plotting
+    if numeric_df.shape[1] > 1:
+        fig, ax = plt.subplots(figsize=(6, 4))
+        sns.heatmap(numeric_df.corr(), annot=True, fmt=".2f", cmap="coolwarm", ax=ax)
+        st.pyplot(fig)
+    else:
+        st.warning("⚠️ No numeric columns available for correlation matrix.")
 
-    fig, ax = plt.subplots(figsize=(10, 8))
-    sns.heatmap(numeric_df.corr(), annot=True, fmt='.2f', cmap='coolwarm', ax=ax)
-
-    st.pyplot(fig)
 
     # Add more space
     st.markdown("<br><br>", unsafe_allow_html=True)
