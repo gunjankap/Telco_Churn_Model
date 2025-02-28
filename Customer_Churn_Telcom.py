@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 """
 Created on Mon Feb 24 18:33:30 2025
@@ -136,7 +135,7 @@ model, acc, cm, feature_importance, X_train, X_test, y_train, y_test = train_mod
 
 # Sidebar options for navigation
 option = st.sidebar.selectbox("🔍 Choose Analysis", 
-                              ["📊 Dataset Exploration", "📈 Visualizations", "🤖 Churn Prediction", "📈 Model Validation & Analysis"])
+                              ["📊 Dataset Exploration","📈 Visualizations", "🤖 Churn Prediction", "📈 Model Validation & Analysis", "🎯 Customer Profile Analysis"])
 # Global Filters - Positioned Below Page Selection
 st.sidebar.markdown("### 🌍 Global Filters")
 
@@ -244,6 +243,8 @@ if option == "📊 Dataset Exploration":
     # Copy Link Button
     st.text_input("🔗 Shareable Link", dashboard_url, disabled=True)
     st.button("📋 Copy Link")
+    
+
 
 # Page 2: Visualizations
 elif option == "📈 Visualizations":
@@ -595,7 +596,7 @@ elif option == "📈 Model Validation & Analysis":
         </div>
     """, unsafe_allow_html=True)
 
-st.markdown("""
+    st.markdown("""
     <style>
         div.stButton > button {
             font-weight: bold;
@@ -614,79 +615,135 @@ st.markdown("""
     
 """, unsafe_allow_html=True)
 
-col1, col2, col3 = st.columns(3)
+# 📌 Heading Above Buttons
+    st.markdown("""
+    <h3 style="text-align: center; color: #000000; font-weight: bold; margin-bottom: 10px;">
+        Select Evaluation Metrics
+    </h3>
+""", unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns(3)
 
 
-# Create a session state variable to store selected button
-if "selected_metric" not in st.session_state:
-    st.session_state.selected_metric = "conf_matrix"  # Default to Confusion Matrix
-
-# Define button actions
-with col1:
-    if st.button("🔍 Confusion Matrix", key="conf_matrix"):
-        st.session_state.selected_metric = "conf_matrix"
-
-with col2:
-    if st.button("📊 Feature Importance", key="feat_imp"):
-        st.session_state.selected_metric = "feat_imp"
-
-with col3:
-    if st.button("🔗 Correlation Matrix", key="corr_matrix"):
-        st.session_state.selected_metric = "corr_matrix"
-
-st.markdown("</div>", unsafe_allow_html=True)  # Closing the box container
-
-
-# 📌 Display Confusion Matrix
-if st.session_state.selected_metric == "conf_matrix":
-    st.markdown('<h3 style="text-align: center; color: #000000;">📉 Confusion Matrix</h3>', unsafe_allow_html=True)
-
-    # Generate a Random Confusion Matrix for Demonstration (Replace with Actual Model Output)
-    y_true = df["Churn"]
-    y_pred = df["Churn"].sample(frac=1, random_state=42)  # Dummy shuffled values (Replace with model predictions)
-    cm = confusion_matrix(y_true, y_pred)
-
-    fig, ax = plt.subplots(figsize=(4, 3))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax)
-    st.pyplot(fig)
-
-# 📌 Display Feature Importance
-elif st.session_state.selected_metric == "feat_imp":
-    st.markdown('<h3 style="text-align: center; color: #000000;">📊 Feature Importance</h3>', unsafe_allow_html=True)
-
-    fig, ax = plt.subplots(figsize=(5, 3))
-
-    # Ensure bars are light yellow
-    feature_importance.plot(kind='barh', ax=ax, color='#FFD700', edgecolor='black')  # Light Yellow Bars
+    # Create a session state variable to store selected button
+    if "selected_metric" not in st.session_state:
+        st.session_state.selected_metric = "conf_matrix"  # Default to Confusion Matrix
     
-    # Update axis labels with smaller font size
-    ax.set_xlabel("Importance Score", fontsize=10, fontweight='bold')
-    ax.set_ylabel("Features", fontsize=10, fontweight='bold')
-
-    # Improve visual styling
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
+    # Define button actions
+    with col1:
+        if st.button("🔍 Confusion Matrix", key="conf_matrix"):
+            st.session_state.selected_metric = "conf_matrix"
     
-    st.pyplot(fig)
-
-# 📌 Display Correlation Matrix
-elif st.session_state.selected_metric == "corr_matrix":
-    st.markdown('<h3 style="text-align: center; color: #000000;">🔗 Correlation Matrix</h3>', unsafe_allow_html=True)
-
-    # Select only numeric columns for correlation
-    numeric_df = df.select_dtypes(include=['number'])
-
-    # Ensure there are numeric columns before plotting
-    if numeric_df.shape[1] > 1:
-        fig, ax = plt.subplots(figsize=(6, 4))
-        sns.heatmap(numeric_df.corr(), annot=True, fmt=".2f", cmap="coolwarm", ax=ax)
+    with col2:
+        if st.button("📊 Feature Importance", key="feat_imp"):
+            st.session_state.selected_metric = "feat_imp"
+    
+    with col3:
+        if st.button("🔗 Correlation Matrix", key="corr_matrix"):
+            st.session_state.selected_metric = "corr_matrix"
+    
+    st.markdown("</div>", unsafe_allow_html=True)  # Closing the box container
+    
+    
+    # 📌 Display Confusion Matrix
+    if st.session_state.selected_metric == "conf_matrix":
+        st.markdown('<h3 style="text-align: center; color: #000000;">📉 Confusion Matrix</h3>', unsafe_allow_html=True)
+    
+        # Generate a Random Confusion Matrix for Demonstration (Replace with Actual Model Output)
+        y_true = filtered_df["Churn"]
+        y_pred = filtered_df["Churn"].sample(frac=1, random_state=42)  # Dummy shuffled values (Replace with model predictions)
+        cm = confusion_matrix(y_true, y_pred)
+    
+        fig, ax = plt.subplots(figsize=(4, 3))
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax)
         st.pyplot(fig)
-    else:
-        st.warning("⚠️ No numeric columns available for correlation matrix.")
+    
+    # 📌 Display Feature Importance
+    elif st.session_state.selected_metric == "feat_imp":
+        st.markdown('<h3 style="text-align: center; color: #000000;">📊 Feature Importance</h3>', unsafe_allow_html=True)
+    
+        fig, ax = plt.subplots(figsize=(5, 3))
+    
+        # Ensure bars are light yellow
+        feature_importance.plot(kind='barh', ax=ax, color='#FFD700', edgecolor='black')  # Light Yellow Bars
+        
+        # Update axis labels with smaller font size
+        ax.set_xlabel("Importance Score", fontsize=10, fontweight='bold')
+        ax.set_ylabel("Features", fontsize=10, fontweight='bold')
+    
+        # Improve visual styling
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        
+        st.pyplot(fig)
+    
+    # 📌 Display Correlation Matrix
+    elif st.session_state.selected_metric == "corr_matrix":
+        st.markdown('<h3 style="text-align: center; color: #000000;">🔗 Correlation Matrix</h3>', unsafe_allow_html=True)
+    
+        # Select only numeric columns for correlation
+        numeric_df = filtered_df.select_dtypes(include=['number'])
+    
+        # Ensure there are numeric columns before plotting
+        if numeric_df.shape[1] > 1:
+            fig, ax = plt.subplots(figsize=(6, 4))
+            sns.heatmap(numeric_df.corr(), annot=True, fmt=".2f", cmap="coolwarm", ax=ax)
+            st.pyplot(fig)
+        else:
+            st.warning("⚠️ No numeric columns available for correlation matrix.")
+    
+    
+        # Add more space
+        st.markdown("<br><br>", unsafe_allow_html=True)
+    
+# Customer Profile Analysis Page
+if option == "🎯 Customer Profile Analysis":
+    st.title("🎯 Customer Profile Analysis: Understanding Your Customers")
+    
+    st.markdown("""
+    Gain deep insights into customer behaviors, preferences, and churn patterns.
+    Use this data to develop targeted strategies and improve retention.
+    """)
+    
+    # Gender and Churn Analysis
+    st.subheader("🧑‍🤝‍🧑 Gender Distribution & Churn")
+    filtered_df['gender'] = filtered_df['gender'].map({1: 'Male', 0: 'Female'})
+    gender_df = filtered_df.groupby(['gender', 'Churn']).size().reset_index(name='count')
+    fig = px.sunburst(gender_df, path=['gender', 'Churn'], values='count',
+                      title="Gender Influence on Churn",
+                      color='Churn', color_discrete_map={'Yes': '#1656AD', 'No': '#00B496'},color_discrete_sequence=px.colors.qualitative.Set3)
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Age and Tenure Influence
+    st.subheader("⏳ Customer Tenure & Monthly Charges")
+    fig = px.scatter(filtered_df, x='tenure', y='MonthlyCharges', color='Churn',
+                     title="Tenure vs Monthly Charges: Who is at Risk?",
+                     color_discrete_map={'Yes': '#E74C3C', 'No': '#2ECC71'})
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Contract Type vs. Churn
+    st.subheader("📜 Contract Type & Churn")
+    contract_df = filtered_df.groupby(['Contract', 'Churn']).size().reset_index(name='count')
+    fig = px.bar(contract_df, x='Contract', y='count', color='Churn',
+                 title="Which Contract Type is More Stable?",
+                 barmode='group', color_discrete_map={'Yes': '#D35400', 'No': '#1ABC9C'})
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Customer Engagement Metrics
+    st.subheader("💳 Payment Method & Engagement")
+    filtered_df['PaymentMethod'] = filtered_df['PaymentMethod'].map({0: 'Electronic check', 1: 'Mailed check',2: 'Bank transfer', 3: 'Automatic'})
+    fig = px.pie(filtered_df, names='PaymentMethod', title="Preferred Payment Methods",
+                 color_discrete_sequence=px.colors.sequential.RdBu)
+    st.plotly_chart(fig, use_container_width=True)
+    
+    st.markdown("### 📌 Takeaway Insights:")
+    st.markdown("- Customers with **month-to-month contracts** are more likely to churn.")
+    st.markdown("- **Electronic Check users** show higher churn rates – possibly due to dissatisfaction with billing.")
+    st.markdown("- Customers with longer **tenure** tend to have higher loyalty.")
+    st.markdown("- **High Monthly Charges** could be a red flag leading to increased churn risk.")
+    
+    st.markdown("🚀 Use these insights to improve retention strategies and reduce churn!")
 
-
-    # Add more space
-    st.markdown("<br><br>", unsafe_allow_html=True)
 
 
 
